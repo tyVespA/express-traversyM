@@ -6,9 +6,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const logger = require("./middleware/logger");
-const members = require("./Members");
 
 app.use(logger);
+
+// Body parser middleware
+app.use(express.json());
+
+app.use(express.urlencoded({ extended: false }));
 
 // Set static folder
 // all files in public folder will be available
@@ -20,24 +24,8 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Get all members
-app.get("/api/members", (req, res) => {
-  // .json simply sends back the json
-  res.json(members);
-});
-
-// Get single member
-app.get("/api/members/:id", (req, res) => {
-  const memberId = req.params.id;
-  if (memberId > members.length - 1) {
-    res
-      .status(400)
-      .json({ msg: `Member with the id of ${memberId} not found` });
-  } else {
-    res.json(members[memberId]);
-  }
-  // res.json(members.filter((member) => member.id === parseInt(req.params.id)));
-});
+// Members API routes
+app.use("/api/members", require("./routes/api/members"));
 
 app.listen(PORT, () => {
   console.log("Server started on port:", PORT);
